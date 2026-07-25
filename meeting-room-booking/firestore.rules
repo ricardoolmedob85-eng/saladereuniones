@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Solo usuarios autenticados (los 4 usuarios autorizados de Firebase Auth)
+    // pueden leer y escribir reservas. El filtrado de "usuarios autorizados"
+    // ya ocurre en Firebase Auth (solo se crean esas 4 cuentas).
+    match /bookings/{bookingId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.organizerEmail == request.auth.token.email;
+      allow update: if request.auth != null;
+      allow delete: if false; // las reservas se cancelan (soft delete), no se borran
+    }
+  }
+}
